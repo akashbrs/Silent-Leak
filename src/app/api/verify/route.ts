@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { verifyToken, redis } from '@/lib/auth';
+import { verifyToken, createToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
 import crypto from 'crypto';
 
@@ -48,14 +48,26 @@ export async function POST(req: Request) {
     const extractedAnswer = flagMatch[1].trim().toLowerCase();
     const hashedInput = crypto.createHash('sha256').update(extractedAnswer).digest('hex');
 
+    console.log("--- DEBUG VERIFY ---");
+    console.log("Raw Answer:", answer);
+    console.log("Extracted:", extractedAnswer);
+    console.log("Hashed Input:", hashedInput);
+    console.log("Expected Hash:", answerHashes[questionIndex]);
+    console.log("Match?", hashedInput === answerHashes[questionIndex]);
+
     if (hashedInput === answerHashes[questionIndex]) {
       let solved: string[] = Array.isArray(payload.solved) ? payload.solved : [];
       
       if (!solved.includes(questionIndex.toString())) {
         solved = [...solved, questionIndex.toString()];
         
-        // Issue updated stateless token
-        const newToken = await createToken({ ...payload, solved });
+        // Issue updated stateless token (omit iat/exp from old payload to avoid jose strict errors)
+        const newToken = await createToken({ 
+          sessionId: payload.sessionId,
+          csrfToken: payload.csrfToken,
+          solved 
+        });
+        
         cookieStore.set('session', newToken, {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
@@ -77,7 +89,8 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ success: false });
-  } catch (error) {
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  } catch (error: any) {
+    console.error("DEBUG ERROR:", error);
+    return NextResponse.json({ error: 'Internal Server Error', details: error.message }, { status: 500 });
   }
 }
