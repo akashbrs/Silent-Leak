@@ -43,8 +43,8 @@ class MockRedis {
   }
 }
 
-export const redis = process.env.NODE_ENV === 'production' 
-  ? new Redis(process.env.REDIS_URL || 'redis://localhost:6379') 
+export const redis = process.env.REDIS_URL 
+  ? new Redis(process.env.REDIS_URL) 
   : (new MockRedis() as any);
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'supersecretjwtkey_1234567890');
