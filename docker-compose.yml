@@ -1,0 +1,17 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8090:3000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=supersecretjwtkey_1234567890
+      - CSRF_SECRET=supersecretcsrfkey_1234567890
+      - COORDINATES="12.7409° N, 77.8253° E"
+    depends_on:
+      - redis
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    restart: always
