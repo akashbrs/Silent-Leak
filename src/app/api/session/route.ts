@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     // Create JWT containing our stateless session data
     const token = await createToken({ 
       sessionId, 
-      solved: [], 
+      solved: {}, 
       csrfToken 
     });
 

@@ -56,10 +56,10 @@ export async function POST(req: Request) {
     console.log("Match?", hashedInput === answerHashes[questionIndex]);
 
     if (hashedInput === answerHashes[questionIndex]) {
-      let solved: string[] = Array.isArray(payload.solved) ? payload.solved : [];
+      let solved: Record<string, string> = (payload.solved && typeof payload.solved === 'object' && !Array.isArray(payload.solved)) ? payload.solved : {};
       
-      if (!solved.includes(questionIndex.toString())) {
-        solved = [...solved, questionIndex.toString()];
+      if (!solved[questionIndex.toString()]) {
+        solved = { ...solved, [questionIndex.toString()]: trimmedAnswer };
         
         // Issue updated stateless token (omit iat/exp from old payload to avoid jose strict errors)
         const newToken = await createToken({ 
@@ -77,7 +77,7 @@ export async function POST(req: Request) {
         });
       }
 
-      if (solved.length === 12) {
+      if (Object.keys(solved).length === 12) {
         return NextResponse.json({ 
           success: true, 
           completed: true, 

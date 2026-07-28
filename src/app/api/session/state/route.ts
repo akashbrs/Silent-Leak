@@ -11,13 +11,13 @@ export async function GET() {
     const payload = await verifyToken(token);
     if (!payload || !payload.sessionId) return NextResponse.json({ solved: [] });
 
-    const solved = payload.solved || [];
+    const solved = payload.solved || {};
     const responseData: any = { 
       solved,
       csrfToken: payload.csrfToken 
     };
 
-    if (solved.length === 12) {
+    if (Object.keys(solved).length === 12) {
       responseData.coordinates = process.env.COORDINATES;
       responseData.completed = true;
     }

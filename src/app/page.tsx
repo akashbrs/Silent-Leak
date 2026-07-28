@@ -46,12 +46,18 @@ export default function Home() {
         setCsrfToken(data.csrfToken);
       }
 
-      if (data.solved && data.solved.length > 0) {
+      if (data.solved && Object.keys(data.solved).length > 0) {
         const newSolved = Array(clientQuestions.length).fill(false);
-        data.solved.forEach((idxStr: string) => {
-          newSolved[parseInt(idxStr, 10)] = true;
+        const newAnswers = Array(clientQuestions.length).fill("");
+        
+        Object.entries(data.solved).forEach(([idxStr, ansStr]) => {
+          const idx = parseInt(idxStr, 10);
+          newSolved[idx] = true;
+          newAnswers[idx] = ansStr as string;
         });
+        
         setSolved(newSolved);
+        setAnswers(newAnswers);
         setStarted(true);
         setActiveTab("questions");
       }
