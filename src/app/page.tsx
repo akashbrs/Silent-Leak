@@ -109,7 +109,7 @@ export default function Home() {
       if (data.success) {
         if (data.solved) {
           const newSolved = Array(clientQuestions.length).fill(false);
-          data.solved.forEach((idxStr: string) => {
+          Object.keys(data.solved).forEach((idxStr: string) => {
             newSolved[parseInt(idxStr, 10)] = true;
           });
           setSolved(newSolved);
@@ -234,7 +234,7 @@ export default function Home() {
 
                 <div className="bg-black/40 border border-white/10 rounded-xl p-6 font-mono">
                   <p className="text-sm text-neutral-500 mb-2 uppercase tracking-widest">Target Coordinates</p>
-                  <p className="text-2xl md:text-4xl text-cyan-400 font-bold tracking-wider">{coordinates}</p>
+                  <p className="text-2xl md:text-4xl text-cyan-400 font-bold tracking-wider">BSCTF{'{'}{'{'}{coordinates.replace(', ', ' + ')}{'}'}{'}'}</p>
                 </div>
               </div>
             </motion.div>
@@ -308,7 +308,7 @@ export default function Home() {
                   <div
                     key={idx}
                     className={`p-6 rounded-2xl border backdrop-blur-md transition-colors ${
-                      solved[idx] ? 'bg-cyan-900/10 border-cyan-500/30' : 'bg-neutral-900/40 border-white/10'
+                      solved[idx] ? 'bg-green-900/10 border-green-500/30' : 'bg-neutral-900/40 border-white/10'
                     }`}
                   >
                     <h3 className="text-lg text-white mb-4 flex gap-3">
@@ -316,33 +316,33 @@ export default function Home() {
                       {q}
                     </h3>
                     
-                    <div className="flex gap-3 items-center">
-                      <div className="relative flex-1">
-                        <input
-                          type="text"
-                          value={answers[idx]}
-                          onChange={(e) => {
-                            const newAnswers = [...answers];
-                            newAnswers[idx] = e.target.value;
-                            setAnswers(newAnswers);
-                          }}
-                          placeholder="BSCTF{...}"
-                          disabled={solved[idx] || verifying[idx] || globalLoading}
-                          className={`w-full bg-black/50 border rounded-xl px-4 py-3 font-mono text-sm text-white placeholder-neutral-600 focus:outline-none focus:ring-1 transition-all ${
-                            solved[idx] ? 'border-cyan-500/50 text-cyan-400' :
-                            errors[idx] ? 'border-red-500 focus:ring-red-500/50' : 'border-white/10 focus:border-cyan-500'
-                          }`}
-                        />
-                        {errors[idx] && (
-                          <Lock className="w-4 h-4 text-red-500 absolute right-4 top-1/2 -translate-y-1/2" />
-                        )}
+                    {solved[idx] ? (
+                      <div className="flex items-center gap-2 text-green-400 bg-green-500/10 border border-green-500/30 px-4 py-3 rounded-xl w-max">
+                        <CheckCircle2 className="w-5 h-5" />
+                        <span className="font-semibold text-sm uppercase tracking-wider">Correct</span>
                       </div>
-                      
-                      {solved[idx] ? (
-                        <div className="h-11 px-4 bg-cyan-500/20 text-cyan-400 rounded-xl flex items-center justify-center border border-cyan-500/30">
-                          <CheckCircle2 className="w-5 h-5" />
+                    ) : (
+                      <div className="flex gap-3 items-center">
+                        <div className="relative flex-1">
+                          <input
+                            type="text"
+                            value={answers[idx]}
+                            onChange={(e) => {
+                              const newAnswers = [...answers];
+                              newAnswers[idx] = e.target.value;
+                              setAnswers(newAnswers);
+                            }}
+                            placeholder="BSCTF{...}"
+                            disabled={verifying[idx] || globalLoading}
+                            className={`w-full bg-black/50 border rounded-xl px-4 py-3 font-mono text-sm text-white placeholder-neutral-600 focus:outline-none focus:ring-1 transition-all ${
+                              errors[idx] ? 'border-red-500 focus:ring-red-500/50' : 'border-white/10 focus:border-cyan-500'
+                            }`}
+                          />
+                          {errors[idx] && (
+                            <Lock className="w-4 h-4 text-red-500 absolute right-4 top-1/2 -translate-y-1/2" />
+                          )}
                         </div>
-                      ) : (
+                        
                         <button
                           onClick={() => handleVerifyOne(idx)}
                           disabled={!answers[idx].trim() || verifying[idx] || globalLoading}
@@ -352,8 +352,8 @@ export default function Home() {
                             <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
                           ) : "Submit"}
                         </button>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

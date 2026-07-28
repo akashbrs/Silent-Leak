@@ -56,7 +56,7 @@ export async function POST(req: Request) {
     console.log("Match?", hashedInput === answerHashes[questionIndex]);
 
     if (hashedInput === answerHashes[questionIndex]) {
-      let solved: Record<string, string> = (payload.solved && typeof payload.solved === 'object' && !Array.isArray(payload.solved)) ? payload.solved : {};
+      let solved: Record<string, string> = (payload.solved && typeof payload.solved === 'object' && !Array.isArray(payload.solved)) ? (payload.solved as Record<string, string>) : {};
       
       if (!solved[questionIndex.toString()]) {
         solved = { ...solved, [questionIndex.toString()]: trimmedAnswer };
