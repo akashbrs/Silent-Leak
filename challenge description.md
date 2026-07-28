@@ -8,4 +8,6 @@ Each correct finding unlocks another stage of the investigation. Once every inte
 
 ## Flag Format
 
-`BSCTF{longitude+latitude}`
+`BSCTF{[East-West Coordinate]+[North-South Coordinate]}`
+
+*(Note: The coordinates should be numerical. Use the East/West position first, followed by a plus sign, and then the North/South position.)*
