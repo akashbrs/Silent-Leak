@@ -1,17 +1,19 @@
 import { NextResponse } from 'next/server';
-import { createToken, redis } from '@/lib/auth';
+import { createToken } from '@/lib/auth';
 import crypto from 'crypto';
 import { cookies } from 'next/headers';
 
 export async function POST(req: Request) {
   try {
     const sessionId = crypto.randomUUID();
+    const csrfToken = crypto.randomBytes(32).toString('hex');
     
-    // Store empty solved array in Redis
-    await redis.setex(`session:${sessionId}`, 7200, JSON.stringify([]));
-
-    // Create JWT
-    const token = await createToken({ sessionId });
+    // Create JWT containing our stateless session data
+    const token = await createToken({ 
+      sessionId, 
+      solved: [], 
+      csrfToken 
+    });
 
     // Set Cookie
     const cookieStore = await cookies();
@@ -22,10 +24,6 @@ export async function POST(req: Request) {
       maxAge: 2 * 60 * 60, // 2 hours
       path: '/'
     });
-
-    // Generate CSRF Token and store in Redis mapped to SessionID
-    const csrfToken = crypto.randomBytes(32).toString('hex');
-    await redis.setex(`csrf:${sessionId}`, 7200, csrfToken);
 
     return NextResponse.json({ success: true, csrfToken });
   } catch (error) {

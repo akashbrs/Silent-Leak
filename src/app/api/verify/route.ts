@@ -26,20 +26,12 @@ export async function POST(req: Request) {
 
     const payload = await verifyToken(token);
     if (!payload || !payload.sessionId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    const sessionId = payload.sessionId as string;
-
-    // Rate Limiting (10 requests per 10 seconds per session)
-    const rateLimitKey = `rate:${sessionId}`;
-    const requests = await redis.incr(rateLimitKey);
-    if (requests === 1) await redis.expire(rateLimitKey, 10);
-    if (requests > 10) return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
 
     const body = await req.json();
     const { questionIndex, answer, csrfToken } = body;
 
     // CSRF Protection
-    const storedCsrf = await redis.get(`csrf:${sessionId}`);
-    if (!storedCsrf || storedCsrf !== csrfToken) {
+    if (!payload.csrfToken || payload.csrfToken !== csrfToken) {
       return NextResponse.json({ error: 'Invalid CSRF Token' }, { status: 403 });
     }
 
@@ -57,14 +49,20 @@ export async function POST(req: Request) {
     const hashedInput = crypto.createHash('sha256').update(extractedAnswer).digest('hex');
 
     if (hashedInput === answerHashes[questionIndex]) {
-      const sessionKey = `session:${sessionId}`;
-      const solvedRaw = await redis.get(sessionKey);
-      if (!solvedRaw) return NextResponse.json({ error: 'Session not found' }, { status: 404 });
-
-      let solved = JSON.parse(solvedRaw);
+      let solved: string[] = Array.isArray(payload.solved) ? payload.solved : [];
+      
       if (!solved.includes(questionIndex.toString())) {
-        solved.push(questionIndex.toString());
-        await redis.setex(sessionKey, 7200, JSON.stringify(solved));
+        solved = [...solved, questionIndex.toString()];
+        
+        // Issue updated stateless token
+        const newToken = await createToken({ ...payload, solved });
+        cookieStore.set('session', newToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: 2 * 60 * 60,
+          path: '/'
+        });
       }
 
       if (solved.length === 12) {
