@@ -271,7 +271,11 @@ export default function Home() {
                   <h3 className="text-xl font-bold text-white mt-8 mb-2">Mission</h3>
                   
                   <p>
-                    Your objective is to reconstruct the complete incident timeline by collecting evidence from publicly available intelligence sources. Each verified finding will unlock another stage of the investigation. Once every evidence item has been validated, determine the precise geographic location of the affected manufacturing facility and recover its coordinates to complete the operation.
+                    Your objective is to reconstruct the complete incident timeline by answering intelligence checkpoints on this secure terminal. Each verified finding will unlock another stage of the investigation. 
+                  </p>
+                  
+                  <p className="mt-4 text-rose-200">
+                    <strong>Important:</strong> The final target location is strictly classified. Do not attempt to guess or geolocate the facility using this briefing alone. Once you successfully validate all intelligence requirements on this platform, our internal system will automatically decrypt and reveal the highly-classified geographic coordinates required to complete the operation.
                   </p>
                   
                   <p className="mt-8 pt-6 border-t border-white/10 text-cyan-400/80 font-mono text-sm">
